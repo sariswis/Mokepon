@@ -31,6 +31,8 @@ body {
 
 #pet_cards, #attack_buttons {
     display: flex;
+    flex-wrap: wrap;
+    justify-content: space-evenly;
     gap: 10px;
 }
 
@@ -48,6 +50,10 @@ body {
     display: flex;
     justify-content: space-around;
     align-items: center;
+}
+
+.pet_card p {
+    width: 70px;
 }
 
 .pet_card img {
@@ -162,7 +168,7 @@ input {
 
 #info_cards {
     display: grid;
-    grid-template-columns: 140px 140px;
+    grid-template-columns: 150px 150px;
     gap: 20px;
 }
 
