@@ -1,0 +1,227 @@
+/*Label is In line, Input and Button are In line Block*/
+@import url('https://fonts.googleapis.com/css2?family=Luckiest+Guy&display=swap');
+
+body {
+    font-family: Candara;
+    background-image: url(assets/background.png);
+    background-size: auto;
+}
+
+.title {
+    color: #0081BC;
+    font-family: 'Luckiest Guy', cursive;
+    font-size: 40px;
+    text-shadow: 2px 0px 25px #00eefb;
+}
+
+.subtitle {
+    font-size: 20px;
+    text-shadow: 2px 0px 25px #00eefb;
+    margin: 10px;
+}
+
+/* Pet Section */
+
+#select_pet {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
+
+#pet_cards, #attack_buttons {
+    display: flex;
+    gap: 10px;
+}
+
+.pet_card {
+    text-align: center;
+    font-weight: 700;
+    width: 200px;
+    height: 120px;
+    border-radius: 20px;
+    background: aquamarine;
+    padding: 10px;
+    box-sizing: border-box;
+    margin: 10px;
+    border: 3px solid white;
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+}
+
+.pet_card img {
+    height: 90px;
+}
+
+.pet_card:hover, input:checked+label {
+    background: #39fdbc;
+    cursor: pointer;
+}
+
+input {
+    display: none;
+}
+
+#btn_select_pet {
+    color: white;
+    font-family: 'Luckiest Guy', cursive;
+    font-size: 20px;
+    text-align: center;
+    width: 200px;
+    height: 60px;
+    border-radius: 20px;
+    background:  #9E00BC;
+    padding: 10px;
+    box-sizing: border-box;
+    margin: 10px;
+    border: 5px solid white;
+}
+ 
+#btn_select_pet:hover {
+    background:  #7e0197;
+    cursor: pointer;
+}
+
+/* Attack Section */
+
+#select_attack {
+    flex-direction: column;
+    align-items: center;
+}
+
+.btn_attack {
+    font-family: Candara;
+    font-weight: 700;
+    font-size: 16px;
+    width: 110px;
+    height: 50px;
+    border-radius: 20px;
+    padding: 10px;
+    box-sizing: border-box;
+    border: 3px solid white;
+}
+
+#btn_fire, #btn_ball, #btn_fish {
+    background: #fdc36c;
+}
+
+#btn_fire:hover, #btn_ball:hover, #btn_fish:hover {
+    background: #f8af41;
+    cursor: pointer;
+}
+
+#btn_water, #btn_bone, #btn_bark {
+    background: #86dad8;
+}
+
+#btn_water:hover, #btn_bone:hover, #btn_bark:hover {
+    background: #4fd7d5;
+    cursor: pointer;
+}
+
+#btn_soil, #btn_carrot, #btn_teeth {
+    background: #b5e3a2;
+}
+
+#btn_soil:hover, #btn_carrot:hover, #btn_teeth:hover {
+    background: #88dd67;
+    cursor: pointer;
+}
+
+#messages {
+    width: 300px;
+    height: 100px;
+    border-radius: 20px;
+    background: radial-gradient(circle, #7fffd4 0%, #39fdbc 100%);
+    padding: 7px;
+    box-sizing: border-box;
+    margin: 10px;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
+
+#messages p {
+    font-weight: 700;
+    font-size: 20px;
+    margin: 10px;
+}
+
+#btn_restart {
+    font-family: Candara;
+    font-weight: 700;
+    font-size: 16px;
+    width: 100px;
+    height: 35px;
+    border-radius: 20px;
+    background: #39fdbc;
+    border: 3px solid white;
+    cursor: pointer;
+}
+
+#info_cards {
+    display: grid;
+    grid-template-columns: 140px 140px;
+    gap: 20px;
+}
+
+.info_card {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 10px;
+    box-sizing: border-box;
+    margin: 8px 0px 8px 0px;
+    border-radius: 20px;
+    background: rgba(0, 238, 251, 0.3);
+}
+
+#p_player_lives, #p_enemy_lives {
+    color: #013c57;
+    font-family: 'Luckiest Guy', cursive;
+    font-size: 24px;
+    text-shadow: 0px 0px 30px #013b54;
+    margin: 20px
+}
+
+#player_logo, #enemy_logo {
+    height: 50px;
+}
+
+#history_player, #history_enemy {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 100px;
+    height: 100px;
+    overflow: auto;
+}
+
+@media (max-width: 810px) {
+    #pet_cards {
+        flex-direction: column;
+    }
+    #attack_buttons .subtitle {
+        grid-column: 1;
+        grid-row: 2;
+    }
+    #btn_fire {
+        grid-column: 2;
+        grid-row: 1;
+    }
+    #btn_water {
+        grid-column: 2;
+        grid-row: 2;
+    }
+    #btn_soil {
+        grid-column: 2;
+        grid-row: 3;
+    }
+    #attack_buttons {
+        display: grid;
+        grid-template-columns: 180px 110px;
+        grid-template-rows: auto auto auto;
+        place-items: center;
+    }
+}

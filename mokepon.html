@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset='UTF-8'>
+    <title>Mokepon!</title>
+    <link rel='stylesheet' href='./styles.css'>
+</head>
+<body>
+    <section id='select_pet'>
+        <h1 class='title'>Mokepon!</h1>
+        <h3 class='subtitle'>Select your pet</h3>
+        <div id='pet_cards'></div>
+        <p><button id='btn_select_pet'>Select</button></p>
+    </section>
+
+    <section id='select_attack'>
+        <h1 class='title'>Mokepon!</h1>
+        
+        <div id='attack_buttons'>
+            <h3 class='subtitle'>Select your attack</h3>
+        </div>
+        <div id='messages'>
+            <p id='message'>Let's go!</p>
+            <button id='btn_restart'>Restart</button>
+        </div>
+        <div id='info_cards'>
+            <div class='info_card'>
+                <h3 id='p_player_lives'></h3>
+                <img id='player_logo'>
+                <h3 id='p_player_pet'>pet</h3>
+                <div id='history_player'></div>
+            </div>
+            <div class='info_card'>
+                <h3 id='p_enemy_lives'></h3>
+                <img id='enemy_logo'>
+                <h3 id='p_enemy_pet'>pet</h3>
+                <div id='history_enemy'></div>
+            </div>
+        </div>
+    </section>
+    <script defer src='./js/mokepon.js'></script>
+</body>
+</html>
