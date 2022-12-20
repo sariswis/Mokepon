@@ -20,7 +20,8 @@ const history_player = document.getElementById('history_player')
 const history_enemy = document.getElementById('history_enemy')
 
 const lt_mokepones = [], dict_mokepones = new Map()
-const real_p_attacks = new Map(), real_e_attacks = new Map() 
+const real_p_attacks = new Map(), real_e_attacks = new Map()
+const special_p_attacks = new Map(), special_e_attacks = new Map()
 var player, enemy, player_i, enemy_i
 var player_lives, enemy_lives, player_attacks, enemy_attacks
 var p_attack, e_attack, player_attack, enemy_attack
@@ -68,17 +69,21 @@ function selectPets(){
 
 function putInfo(){
     player_attacks.forEach((attack) => {
-        attack_buttons.innerHTML += `<button id=${attack.id} class='btn_attack'>${attack.name}</button>`
+        attack_buttons.innerHTML += `<button id=${attack.id} class='btn_attack' name=${attack.real_name}>${attack.name}</button>`
         real_p_attacks.set(attack.name, attack.real_name)
+        special_p_attacks.set(attack.name, attack.special)
     })
-    enemy_attacks.forEach((attack) => {real_e_attacks.set(attack.name, attack.real_name)})
+    enemy_attacks.forEach((attack) => {
+        real_e_attacks.set(attack.name, attack.real_name)
+        special_e_attacks.set(attack.name, attack.special)
+    })
     
     p_player_lives.innerHTML = player_lives
     p_enemy_lives.innerHTML = enemy_lives
     p_player_pet.innerHTML = `${player} ${player_i.type}`
     p_enemy_pet.innerHTML = `${enemy} ${enemy_i.type}` 
-    player_logo.src = `assets/${player}.svg`, player_logo.alt = player
-    enemy_logo.src = `assets/${enemy}.svg`, enemy_logo.alt = enemy
+    player_logo.src = `${player_i.image}`, player_logo.alt = player
+    enemy_logo.src = `${enemy_i.image}`, enemy_logo.alt = enemy
 }
 
 function fight(event){
@@ -103,7 +108,27 @@ function fight(event){
 
     createMessage(result)
     checkLives()
+
+    if (special_p_attacks.get(p_attack) || (special_e_attacks.get(e_attack))){
+        specialAttack(result)
+    } 
 }    
+
+function specialAttack(result){
+    if (result == `You win!`){
+        if (enemy_lives > 0){
+            enemy_lives--
+            p_enemy_lives.innerHTML = enemy_lives
+            checkLives()
+        }
+    } else if (result == `You've lost!`){
+        if (player_lives > 0){
+            player_lives--
+            p_player_lives.innerHTML = player_lives
+            checkLives()
+        }
+    }
+}
 
 function createMessage(result){
     new_player_a = document.createElement('p')
@@ -148,35 +173,56 @@ function random(min, max){
 
 function loadData(){
     class Mokepon {
-        constructor (name, type, attacks, lives) {
+        constructor (name, type, attacks, lives, extension) {
             this.name = name
             this.type = type
             this.attacks = attacks
-            this.image = `assets/${name}.svg`
+            this.image = `assets/${name}.${extension}`
             this.lives = lives
         }
     }
 
-    let cattie_attacks = [{'name':'Ball 🧶', 'id':'btn_ball', 'real_name':'Fire 🔥'},
-                        {'name':'Fish 🐟', 'id':'btn_fish', 'real_name':'Fire 🔥'},
-                        {'name':'Fire 🔥', 'id':'btn_fire', 'real_name':'Fire 🔥'},
-                        {'name':'Water 💧', 'id':'btn_water', 'real_name':'Water 💧'},
-                        {'name':'Soil 🌱', 'id':'btn_soil', 'real_name':'Soil 🌱'}]
+    let cattie_attacks = [{'name':'Ball 🧶', 'id':'btn_ball', 'real_name':'Fire 🔥', 'special':true},
+                        {'name':'Fish 🐟', 'id':'btn_fish', 'real_name':'Fire 🔥', 'special':true},
+                        {'name':'Fire 🔥', 'id':'btn_fire', 'real_name':'Fire 🔥', 'special':false},
+                        {'name':'Water 💧', 'id':'btn_water', 'real_name':'Water 💧', 'special':false},
+                        {'name':'Soil 🌱', 'id':'btn_soil', 'real_name':'Soil 🌱', 'special':false}]
 
-    let doggito_attacks = [{'name':'Bone 🦴', 'id':'btn_bone', 'real_name':'Water 💧'},
-                        {'name':'Bark 🐶', 'id':'btn_bark', 'real_name':'Water 💧'},
-                        {'name':'Fire 🔥', 'id':'btn_fire', 'real_name':'Fire 🔥'},
-                        {'name':'Water 💧', 'id':'btn_water', 'real_name':'Water 💧'},
-                        {'name':'Soil 🌱', 'id':'btn_soil', 'real_name':'Soil 🌱'}]
+    let doggito_attacks = [{'name':'Bone 🦴', 'id':'btn_bone', 'real_name':'Water 💧', 'special':true},
+                        {'name':'Bark 🐶', 'id':'btn_bark', 'real_name':'Water 💧', 'special':true},
+                        {'name':'Fire 🔥', 'id':'btn_fire', 'real_name':'Fire 🔥', 'special':false},
+                        {'name':'Water 💧', 'id':'btn_water', 'real_name':'Water 💧', 'special':false},
+                        {'name':'Soil 🌱', 'id':'btn_soil', 'real_name':'Soil 🌱', 'special':false}]
 
-    let lapinette_attacks = [{'name':'Carrot 🥕', 'id':'btn_carrot', 'real_name':'Soil 🌱'},
-                        {'name':'Teeth 🦷', 'id':'btn_teeth', 'real_name':'Soil 🌱'},
-                        {'name':'Fire 🔥', 'id':'btn_fire', 'real_name':'Fire 🔥'},
-                        {'name':'Water 💧', 'id':'btn_water', 'real_name':'Water 💧'},
-                        {'name':'Soil 🌱', 'id':'btn_soil', 'real_name':'Soil 🌱'}]
+    let lapinette_attacks = [{'name':'Carrot 🥕', 'id':'btn_carrot', 'real_name':'Soil 🌱', 'special':true},
+                        {'name':'Teeth 🦷', 'id':'btn_teeth', 'real_name':'Soil 🌱', 'special':true},
+                        {'name':'Fire 🔥', 'id':'btn_fire', 'real_name':'Fire 🔥', 'special':false},
+                        {'name':'Water 💧', 'id':'btn_water', 'real_name':'Water 💧', 'special':false},
+                        {'name':'Soil 🌱', 'id':'btn_soil', 'real_name':'Soil 🌱', 'special':false}]
 
-    let cattie = new Mokepon('Cattie', '🔥', cattie_attacks, 4)
-    let doggito = new Mokepon('Doggito', '💧', doggito_attacks, 4)
-    let lapinette = new Mokepon('Lapinette', '🌱', lapinette_attacks, 4)
-    lt_mokepones.push(cattie, doggito, lapinette)
+    let cheftle_attacks = [{'name':'Pan 🍳', 'id':'btn_pan', 'real_name':'Fire 🔥', 'special':true},
+                        {'name':'Fog ☁️', 'id':'btn_fog', 'real_name':'Water 💧', 'special':true},
+                        {'name':'Fire 🔥', 'id':'btn_fire', 'real_name':'Fire 🔥', 'special':false},
+                        {'name':'Water 💧', 'id':'btn_water', 'real_name':'Water 💧', 'special':false},
+                        {'name':'Soil 🌱', 'id':'btn_soil', 'real_name':'Soil 🌱', 'special':false}]
+
+    let lolito_attacks = [{'name':'Peck 🦆', 'id':'btn_peck', 'real_name':'Soil 🌱', 'special':true},
+                        {'name':'Splash 💦', 'id':'btn_splash', 'real_name':'Water 💧', 'special':true},
+                        {'name':'Fire 🔥', 'id':'btn_fire', 'real_name':'Fire 🔥', 'special':false},
+                        {'name':'Water 💧', 'id':'btn_water', 'real_name':'Water 💧', 'special':false},
+                        {'name':'Soil 🌱', 'id':'btn_soil', 'real_name':'Soil 🌱', 'special':false}]
+
+    let roundi_attacks = [{'name':'Cookie 🍪', 'id':'btn_cookie', 'real_name':'Fire 🔥', 'special':true},
+                        {'name':'Claws 🐾', 'id':'btn_claws', 'real_name':'Soil 🌱', 'special':true},
+                        {'name':'Fire 🔥', 'id':'btn_fire', 'real_name':'Fire 🔥', 'special':false},
+                        {'name':'Water 💧', 'id':'btn_water', 'real_name':'Water 💧', 'special':false},
+                        {'name':'Soil 🌱', 'id':'btn_soil', 'real_name':'Soil 🌱', 'special':false}]
+
+    let cattie = new Mokepon('Cattie', '🔥', cattie_attacks, 6, 'svg')
+    let doggito = new Mokepon('Doggito', '💧', doggito_attacks, 6, 'svg')
+    let lapinette = new Mokepon('Lapinette', '🌱', lapinette_attacks, 6, 'svg')
+    let cheftle = new Mokepon('Cheftle', '🔥💧', cheftle_attacks, 6, 'png')
+    let lolito = new Mokepon('Lolito', '🌱💧', lolito_attacks, 6, 'png')
+    let roundi = new Mokepon('Roundi', '🔥🌱', roundi_attacks, 6, 'png')
+    lt_mokepones.push(cattie, doggito, lapinette, cheftle, lolito, roundi)
 }

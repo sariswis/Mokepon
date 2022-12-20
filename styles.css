@@ -108,29 +108,29 @@ input {
     border: 3px solid white;
 }
 
-#btn_fire, #btn_ball, #btn_fish {
+[name='Fire']{
     background: #fdc36c;
 }
 
-#btn_fire:hover, #btn_ball:hover, #btn_fish:hover {
+[name='Fire']:hover {
     background: #f8af41;
     cursor: pointer;
 }
 
-#btn_water, #btn_bone, #btn_bark {
+[name='Water'] {
     background: #86dad8;
 }
 
-#btn_water:hover, #btn_bone:hover, #btn_bark:hover {
+[name='Water']:hover {
     background: #4fd7d5;
     cursor: pointer;
 }
 
-#btn_soil, #btn_carrot, #btn_teeth {
+[name='Soil'] {
     background: #b5e3a2;
 }
 
-#btn_soil:hover, #btn_carrot:hover, #btn_teeth:hover {
+[name='Soil']:hover {
     background: #88dd67;
     cursor: pointer;
 }
