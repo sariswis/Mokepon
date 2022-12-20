@@ -20,8 +20,7 @@ const history_player = document.getElementById('history_player')
 const history_enemy = document.getElementById('history_enemy')
 
 const lt_mokepones = [], dict_mokepones = new Map()
-const real_p_attacks = new Map(), real_e_attacks = new Map()
-const special_p_attacks = new Map(), special_e_attacks = new Map()
+const info_p_attacks = new Map(), info_e_attacks = new Map()
 var player, enemy, player_i, enemy_i
 var player_lives, enemy_lives, player_attacks, enemy_attacks
 var p_attack, e_attack, player_attack, enemy_attack
@@ -70,12 +69,10 @@ function selectPets(){
 function putInfo(){
     player_attacks.forEach((attack) => {
         attack_buttons.innerHTML += `<button id=${attack.id} class='btn_attack' name=${attack.real_name}>${attack.name}</button>`
-        real_p_attacks.set(attack.name, attack.real_name)
-        special_p_attacks.set(attack.name, attack.special)
+        info_p_attacks.set(attack.name, {'real_name':attack.real_name, 'special':attack.special})
     })
     enemy_attacks.forEach((attack) => {
-        real_e_attacks.set(attack.name, attack.real_name)
-        special_e_attacks.set(attack.name, attack.special)
+        info_e_attacks.set(attack.name, {'real_name':attack.real_name, 'special':attack.special})
     })
     
     p_player_lives.innerHTML = player_lives
@@ -89,7 +86,8 @@ function putInfo(){
 function fight(event){
     p_attack = event.target.innerHTML
     e_attack = enemy_attacks[random(0, enemy_attacks.length - 1)].name
-    player_attack = real_p_attacks.get(p_attack), enemy_attack = real_e_attacks.get(e_attack)
+    info_p_attack = info_p_attacks.get(p_attack), info_e_attack = info_e_attacks.get(e_attack)
+    player_attack = info_p_attack['real_name'], enemy_attack = info_e_attack['real_name']
     console.log(player_attack, enemy_attack)
 
     if ((player_attack == enemy_attack)){
@@ -109,24 +107,20 @@ function fight(event){
     createMessage(result)
     checkLives()
 
-    if (special_p_attacks.get(p_attack) || (special_e_attacks.get(e_attack))){
+    if (info_p_attack['special'] || info_e_attack['special']){
         specialAttack(result)
     } 
 }    
 
 function specialAttack(result){
-    if (result == `You win!`){
-        if (enemy_lives > 0){
-            enemy_lives--
-            p_enemy_lives.innerHTML = enemy_lives
-            checkLives()
-        }
-    } else if (result == `You've lost!`){
-        if (player_lives > 0){
-            player_lives--
-            p_player_lives.innerHTML = player_lives
-            checkLives()
-        }
+    if (result == `You win!` && enemy_lives > 0){
+        enemy_lives--
+        p_enemy_lives.innerHTML = enemy_lives
+        checkLives()
+    } else if (result == `You've lost!` && player_lives > 0){
+        player_lives--
+        p_player_lives.innerHTML = player_lives
+        checkLives()
     }
 }
 
