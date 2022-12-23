@@ -5,21 +5,19 @@ app.use(cors())
 app.use(express.json())
 
 const players = new Map()
+var enemies
 
 class Player {
-    constructor(id){
+    constructor(id=''){
         this.id = id
-        this.mokepon = ''
+        this.mokepon = null
     }
     updatePosition(x, y){
-        this.x = x
-        this.y = y
+        this.mokepon.x = x
+        this.mokepon.y = y
     }
-}
-
-class Mokepon {
-    constructor(name){
-        this.name = name
+    updateIdMokepon(id){
+        this.mokepon.id = id
     }
 }
 
@@ -34,11 +32,11 @@ app.get('/join', (req, res) => {
 
 app.post('/mokepon/:idPlayer', (req, res) => {
     const idPlayer = req.params.idPlayer || ''
-    const name = req.body.mokepon || ''
-    const mokepon = new Mokepon(name)
+    const mokepon = req.body.mokepon || null
     const player = players.get(idPlayer)
     if (player != undefined){
         player.mokepon = mokepon
+        player.updateIdMokepon(idPlayer)
     }
     console.log(players)
     res.end()
@@ -52,8 +50,8 @@ app.post('/mokepon/:idPlayer/position', (req, res) => {
     if (player != undefined){
         player.updatePosition(x, y)
     }
-    console.log(player)
-    res.end()
+    enemies = Array.from(players.values()).filter((player) => player.id != idPlayer)
+    res.send({enemies})
 })
 
 app.listen(8080, () => {

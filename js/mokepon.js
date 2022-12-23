@@ -27,6 +27,35 @@ const p_enemy_pet = document.getElementById('p_enemy_pet')
 const history_player = document.getElementById('history_player')
 const history_enemy = document.getElementById('history_enemy')
 
+class Mokepon {
+    constructor (name, type, lives, attacks, x, y, width=40, height=50, id=null) {
+        this.id = id
+        this.name = name
+        this.type = type
+        this.attacks = attacks
+        this.lives = lives
+        this.image = `assets/${name}.png`
+        this.logo_src = `assets/${name}Logo.png`
+        this.width = width
+        this.height = height
+        this.x = x || random(0, canvas.width - this.width)
+        this.y = y || random(0, canvas.height - this.height)
+        this.vel_x = 0
+        this.vel_y = 0
+}
+copyMokepon(){
+    return new Mokepon(this.name, this.type, this.lives, this.attacks, this.x, this.y)
+}
+drawMokepon(){
+    let logo = new Image()
+    logo.src = this.logo_src
+    map.drawImage(logo, this.x, this.y, this.width, this.height)
+}
+stopMokepon(){
+    this.vel_x = 0, this.vel_y = 0
+}
+}
+
 const lt_mokepones = [], dict_mokepones = new Map(), max_map_width = 630
 const info_p_attacks = new Map(), info_e_attacks = new Map()
 var player, enemy, player_i, enemy_i, player_lives, enemy_lives
@@ -72,7 +101,7 @@ function selectPet(){
     for(pet of input_pets){
         if (pet.checked){
             player = pet.id
-            player_i = dict_mokepones.get(player).copyMokepon(145, 90)
+            player_i = dict_mokepones.get(player).copyMokepon()
             player_lives = player_i.lives
             sp_player_pet.innerHTML = `${player}`
             setMap()
@@ -99,7 +128,7 @@ function shareMokepon(player) {
     fetch(`http://localhost:8080/mokepon/${idPlayer}`, {
         method: 'post',
         headers: {"Content-Type": "application/json"},
-        body: JSON.stringify({mokepon: player})
+        body: JSON.stringify({mokepon: player_i})
     })
 }
 
@@ -125,6 +154,7 @@ function setMap(){
 function drawMap(){
     player_i.x += player_i.vel_x
     player_i.y += player_i.vel_y
+    
     if (player_i.x < 0){player_i.x = 0} 
     else if (player_i.x > canvas.width - player_i.width){player_i.x = canvas.width - player_i.width}
     if (player_i.y < 0){player_i.y = 0} 
@@ -132,12 +162,9 @@ function drawMap(){
     
     
     map.clearRect(0, 0, canvas.width, canvas.height)
-    lt_mokepones.forEach((mokepon) => {
-        mokepon.drawMokepon()
-    })
     player_i.drawMokepon()
     sharePosition(player_i.x, player_i.y)
-    checkColision()
+    //checkColision()
 }
 
 function sharePosition(x, y){
@@ -146,6 +173,21 @@ function sharePosition(x, y){
         headers: {"Content-Type": "application/json"},
         body: JSON.stringify({x, y})
     })
+        .then(function (res){
+            if (res.ok){
+                res.json()
+                    .then(function({enemies}){
+                        enemies.forEach((e) => {
+                            if (e.mokepon != null){
+                                const enemy = new Mokepon(
+                                    e.mokepon.name, e.mokepon.type, e.mokepon.lives, e.mokepon.attacks, e.mokepon.x, e.mokepon.y
+                                )
+                                enemy.drawMokepon()
+                            }
+                        })
+                    })
+            }
+        })
 }
 
 function move(event){
@@ -299,32 +341,6 @@ function random(min, max){
 }
 
 function loadData(){
-    class Mokepon {
-        constructor (name, type, lives, attacks, x, y, width=40, height=50) {
-            this.name = name
-            this.type = type
-            this.attacks = attacks
-            this.lives = lives
-            this.image = `assets/${name}.png`
-            this.logo = new Image()
-            this.logo.src = `assets/${name}Logo.png`
-            this.x = x
-            this.y = y
-            this.vel_x = 0
-            this.vel_y = 0
-            this.width = width
-            this.height = height
-    }
-    copyMokepon(x=this.x, y=this.y){
-        return new Mokepon(this.name, this.type, this.lives, this.attacks, x, y)
-    }
-    drawMokepon(){
-        map.drawImage(this.logo, this.x, this.y, this.width, this.height)
-    }
-    stopMokepon(){
-        this.vel_x = 0, this.vel_y = 0
-    }
-    }
     let cattie_attacks = [{'name':'Ball 🧶', 'id':'btn_ball', 'real_name':'Fire 🔥', 'color':'#f8af41', 'special':true},
                         {'name':'Fish 🐟', 'id':'btn_fish', 'real_name':'Fire 🔥', 'color':'#f8af41', 'special':true},
                         {'name':'Fire 🔥', 'id':'btn_fire', 'real_name':'Fire 🔥', 'color':'#f8af41', 'special':false},
@@ -361,11 +377,11 @@ function loadData(){
                         {'name':'Water 💧', 'id':'btn_water', 'real_name':'Water 💧', 'color':'#4fd7d5', 'special':false},
                         {'name':'Soil 🌱', 'id':'btn_soil', 'real_name':'Soil 🌱', 'color':'#88dd67', 'special':false}]
 
-    let cattie = new Mokepon('Cattie', '🔥', 7, cattie_attacks, 15, 60)
-    let doggito = new Mokepon('Doggito', '💧', 7, doggito_attacks, 65, 35)
-    let lapinette = new Mokepon('Lapinette', '🌱', 7, lapinette_attacks, 115, 10)
-    let cheftle = new Mokepon('Cheftle', '🔥💧', 6, cheftle_attacks, 165, 10)
-    let lolito = new Mokepon('Lolito', '🌱💧', 6, lolito_attacks, 215, 35)
-    let roundi = new Mokepon('Roundi', '🔥🌱', 6, roundi_attacks, 265, 60)
+    let cattie = new Mokepon('Cattie', '🔥', 7, cattie_attacks)
+    let doggito = new Mokepon('Doggito', '💧', 7, doggito_attacks)
+    let lapinette = new Mokepon('Lapinette', '🌱', 7, lapinette_attacks)
+    let cheftle = new Mokepon('Cheftle', '🔥💧', 6, cheftle_attacks)
+    let lolito = new Mokepon('Lolito', '🌱💧', 6, lolito_attacks)
+    let roundi = new Mokepon('Roundi', '🔥🌱', 6, roundi_attacks)
     lt_mokepones.push(cattie, doggito, lapinette, cheftle, lolito, roundi)
 }
