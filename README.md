@@ -1,4 +1,4 @@
 # Mokepon
-Juego basado en Nuevo Curso de Programación Básica de Platzi
+Juego basado en curso de Platzi
 
 Créditos: Sara Sofía Cárdenas Rodríguez
