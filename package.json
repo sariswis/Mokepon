@@ -1,0 +1,23 @@
+{
+  "name": "mokepon",
+  "version": "1.0.0",
+  "description": "Juego basado en curso de Platzi",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/sariswis/Mokepon.git"
+  },
+  "author": "Sariswis",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/sariswis/Mokepon/issues"
+  },
+  "homepage": "https://github.com/sariswis/Mokepon#readme",
+  "dependencies": {
+    "cors": "^2.8.5",
+    "express": "^4.18.2"
+  }
+}

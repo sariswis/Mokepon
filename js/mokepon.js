@@ -33,6 +33,7 @@ var player, enemy, player_i, enemy_i, player_lives, enemy_lives
 var p_attack, e_attack, player_attack, enemy_attack
 var map_width_i, map_height_i, map_width_f, map_height_f
 var interval, can_attack = true
+var idPlayer
 window.addEventListener('load', loadGame)
 
 function loadGame(){
@@ -51,6 +52,20 @@ function loadGame(){
     })
 
     btn_select_pet.addEventListener('click', selectPet)
+    joinGame()
+}
+
+function joinGame(){
+    fetch('http://localhost:8080/join')
+        .then(function (res){
+            if (res.ok){
+                res.text()
+                    .then(function (response){
+                        console.log(response)
+                        idPlayer = response
+                    })
+            }
+        })
 }
 
 function selectPet(){
@@ -72,11 +87,20 @@ function selectPet(){
             for (move_btn of move_buttons){
                 move_btn.addEventListener('mousedown', move)
                 move_btn.addEventListener('touchstart', move)
-                move_btn.addEventListener('mouseup', function(){player_i.stopMokepon()})
-                move_btn.addEventListener('touchend', function(){player_i.stopMokepon()})
+                move_btn.addEventListener('mouseup', () => {player_i.stopMokepon()})
+                move_btn.addEventListener('touchend', () => {player_i.stopMokepon()})
             }
+            shareMokepon(player)
         }
     }
+}
+
+function shareMokepon(player) {
+    fetch(`http://localhost:8080/mokepon/${idPlayer}`, {
+        method: 'post',
+        headers: {"Content-Type": "application/json"},
+        body: JSON.stringify({mokepon: player})
+    })
 }
 
 function setMap(){
@@ -106,12 +130,22 @@ function drawMap(){
     if (player_i.y < 0){player_i.y = 0} 
     else if (player_i.y > canvas.height - player_i.height){player_i.y = canvas.height - player_i.height}
     
+    
     map.clearRect(0, 0, canvas.width, canvas.height)
     lt_mokepones.forEach((mokepon) => {
         mokepon.drawMokepon()
     })
     player_i.drawMokepon()
+    sharePosition(player_i.x, player_i.y)
     checkColision()
+}
+
+function sharePosition(x, y){
+    fetch(`http://localhost:8080/mokepon/${idPlayer}/position`, {
+        method: 'post',
+        headers: {"Content-Type": "application/json"},
+        body: JSON.stringify({x, y})
+    })
 }
 
 function move(event){
@@ -145,12 +179,12 @@ function checkColision(){
             clearInterval(interval)
             window.removeEventListener('resize', setMap)
             window.removeEventListener('keydown', move)
-            window.addEventListener('keyup', function(){player_i.stopMokepon()})
+            window.addEventListener('keyup', () => {player_i.stopMokepon()})
             for (move_btn of move_buttons){
                 move_btn.removeEventListener('mousedown', move)
                 move_btn.removeEventListener('touchstart', move)
-                move_btn.removeEventListener('mouseup', function(){player_i.stopMokepon()})
-                move_btn.removeEventListener('touchend', function(){player_i.stopMokepon()})
+                move_btn.removeEventListener('mouseup', () => {player_i.stopMokepon()})
+                move_btn.removeEventListener('touchend', () => {player_i.stopMokepon()})
             }
             enemy_i = mokepon, enemy = enemy_i.name, enemy_lives = enemy_i.lives
             putAttacks()
@@ -187,7 +221,6 @@ function fight(event){
     e_attack = enemy_i.attacks[random(0, enemy_i.attacks.length - 1)].name
     info_p_attack = info_p_attacks.get(p_attack), info_e_attack = info_e_attacks.get(e_attack)
     player_attack = info_p_attack['real_name'], enemy_attack = info_e_attack['real_name']
-    console.log(player_attack, enemy_attack)
     info_card_p.style.boxShadow = `0px 0px 25px ${info_p_attack['color']}`;
     info_card_e.style.boxShadow = `0px 0px 25px ${info_e_attack['color']}`;
 
