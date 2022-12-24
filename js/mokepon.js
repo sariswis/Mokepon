@@ -35,7 +35,8 @@ class Mokepon {
         this.attacks = attacks
         this.lives = lives
         this.image = `assets/${name}.png`
-        this.logo_src = `assets/${name}Logo.png`
+        this.logo = new Image()
+        this.logo.src = `assets/${name}Logo.png`
         this.width = width
         this.height = height
         this.x = x || random(0, canvas.width - this.width)
@@ -47,9 +48,7 @@ copyMokepon(){
     return new Mokepon(this.name, this.type, this.lives, this.attacks, this.x, this.y)
 }
 drawMokepon(){
-    let logo = new Image()
-    logo.src = this.logo_src
-    map.drawImage(logo, this.x, this.y, this.width, this.height)
+    map.drawImage(this.logo, this.x, this.y, this.width, this.height)
 }
 stopMokepon(){
     this.vel_x = 0, this.vel_y = 0
@@ -62,7 +61,7 @@ var player, enemy, player_i, enemy_i, player_lives, enemy_lives
 var p_attack, e_attack, player_attack, enemy_attack
 var map_width_i, map_height_i, map_width_f, map_height_f
 var interval, can_attack = true
-var idPlayer
+var idPlayer, lt_enemies = []
 window.addEventListener('load', loadGame)
 
 function loadGame(){
@@ -119,12 +118,12 @@ function selectPet(){
                 move_btn.addEventListener('mouseup', () => {player_i.stopMokepon()})
                 move_btn.addEventListener('touchend', () => {player_i.stopMokepon()})
             }
-            shareMokepon(player)
+            shareMokepon()
         }
     }
 }
 
-function shareMokepon(player) {
+function shareMokepon() {
     fetch(`http://localhost:8080/mokepon/${idPlayer}`, {
         method: 'post',
         headers: {"Content-Type": "application/json"},
@@ -164,6 +163,7 @@ function drawMap(){
     map.clearRect(0, 0, canvas.width, canvas.height)
     player_i.drawMokepon()
     sharePosition(player_i.x, player_i.y)
+    lt_enemies.forEach((enemy) => {enemy.drawMokepon()})
     //checkColision()
 }
 
@@ -177,14 +177,9 @@ function sharePosition(x, y){
             if (res.ok){
                 res.json()
                     .then(function({enemies}){
-                        enemies.forEach((e) => {
-                            if (e.mokepon != null){
-                                const enemy = new Mokepon(
-                                    e.mokepon.name, e.mokepon.type, e.mokepon.lives, e.mokepon.attacks, e.mokepon.x, e.mokepon.y
-                                )
-                                enemy.drawMokepon()
-                            }
-                        })
+                            lt_enemies = enemies.map((e) => {
+                                return new Mokepon(e.mokepon.name, e.mokepon.type, e.mokepon.lives, e.mokepon.attacks, e.mokepon.x, e.mokepon.y)
+                            })
                     })
             }
         })

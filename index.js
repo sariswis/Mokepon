@@ -50,7 +50,7 @@ app.post('/mokepon/:idPlayer/position', (req, res) => {
     if (player != undefined){
         player.updatePosition(x, y)
     }
-    enemies = Array.from(players.values()).filter((player) => player.id != idPlayer)
+    enemies = Array.from(players.values()).filter((player) => player.id != idPlayer && player.mokepon != null)
     res.send({enemies})
 })
 
