@@ -2,6 +2,7 @@ const express = require('express')
 const cors = require('cors')
 const app = express()
 app.use(cors())
+app.use(express.static('public'))
 app.use(express.json())
 
 const players = new Map()
@@ -10,8 +11,16 @@ var count = 0
 class Player {
     constructor(id){
         this.id = id
+        this.mokepon = null
+        this.on = false
+        this.onMap = false
         this.info_e_attack = null
         this.info_p_attack = null
+    }
+    addMokepon(mokepon){
+        this.mokepon = mokepon
+        this.on = true
+        this.onMap = true
     }
     updatePosition(x, y){
         this.mokepon.x = x
@@ -38,7 +47,7 @@ app.post('/mokepon/:idPlayer', (req, res) => {
     const player = players.get(idPlayer)
     const mokepon = req.body.mokepon || null
     if (player != undefined){
-        player.mokepon = mokepon
+        player.addMokepon(mokepon)
     }
     res.end()
 })
@@ -51,8 +60,24 @@ app.post('/map/:idPlayer', (req, res) => {
     if (player != undefined){
         player.updatePosition(x, y)
     }
-    enemies = Array.from(players.values()).filter((player) => player.id != idPlayer && player.mokepon != null)
+    enemies = Array.from(players.values()).filter((player) => 
+        player.id != idPlayer && player.mokepon != null && player.onMap == true)
     res.send({enemies})
+})
+
+app.delete('/disable/:idPlayer/:idEnemy', (req, res) => {
+    const idPlayer = req.params.idPlayer || ''
+    const idEnemy = req.params.idEnemy || ''
+    const player = players.get(idPlayer)
+    const enemy = players.get(idEnemy)
+    if (player != undefined){
+        player.on = false
+    }
+    if (player.on == enemy.on){
+        player.onMap = false
+        enemy.onMap = false
+    }
+    res.end()
 })
 
 app.post('/send-attacks/:idPlayer', (req, res) => {

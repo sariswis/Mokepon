@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset='UTF-8'>
+    <title>Mokepón!</title>
+    <link rel='stylesheet' href='styles.css'>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+</head>
+<body>
+    <section id='select_pet'>
+        <h1 class='title'>Mokepón!</h1>
+        <h2 class='subtitle'>Select your pet</h2>
+        <h2 class='subtitle'>Special attacks are more fun! ⚔️</h2>
+        <div id='pet_cards'></div>
+        <p><button id='btn_select_pet'>Select</button></p>
+    </section>
+
+    <section id='show_map'>
+        <div id='map_utils'>
+            <h1 class='title'>Mokepón!</h1>
+            <h2 class='subtitle'>Explore the map with <span id='sp_player_pet'>your pet</span>!</h2>
+        </div>
+        <canvas id='canvas'></canvas>
+        <div id='move_buttons'>
+            <button class='move_btn' id='ArrowUp'>⬆️</button>
+            <button class='move_btn' id='ArrowRight'>➡️</button>
+            <button class='move_btn' id='ArrowDown'>⬇️</button>
+            <button class='move_btn' id='ArrowLeft'>⬅️</button>
+        </div>
+    </section>
+
+    <section id='select_attack'>
+        <h1 class='title'>Mokepón!</h1>
+        
+        <div id='attack_buttons'>
+            <h2 class='subtitle'>Select your attack</h2>
+        </div>
+        <div id='messages'>
+            <p id='message'>Let's go!</p>
+            <button id='btn_restart'>Restart</button>
+        </div>
+        <div id='info_cards'>
+            <div class='info_card' id='info_card_p'>
+                <h3 id='p_player_lives'></h3>
+                <img id='player_logo'>
+                <h3 id='p_player_pet'>Your pet</h3>
+                <div id='history_player'></div>
+            </div>
+            <div class='info_card' id='info_card_e'>
+                <h3 id='p_enemy_lives'></h3>
+                <img id='enemy_logo'>
+                <h3 id='p_enemy_pet'>Your enemy</h3>
+                <div id='history_enemy'></div>
+            </div>
+        </div>
+    </section>
+    <script defer src='mokepon.js'></script>
+</body>
+</html>
