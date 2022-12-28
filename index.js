@@ -5,53 +5,79 @@ app.use(cors())
 app.use(express.json())
 
 const players = new Map()
-var enemies
+var count = 0
 
 class Player {
-    constructor(id=''){
+    constructor(id){
         this.id = id
-        this.mokepon = null
+        this.info_e_attack = null
+        this.info_p_attack = null
     }
     updatePosition(x, y){
         this.mokepon.x = x
         this.mokepon.y = y
     }
-    updateIdMokepon(id){
-        this.mokepon.id = id
+    updateAttack(info_p_attack){
+        this.info_e_attack = info_p_attack
+        this.info_p_attack = info_p_attack
     }
 }
 
 app.get('/join', (req, res) => {
-    const id = `${Math.random()}`.replace('0.', '')
-    const player = new Player(id)
-    players.set(id, player)
-    console.log('Id', id)
+    count++
+    const idPlayer = `${count}` || ''
+    const player = new Player(idPlayer)
+    players.set(idPlayer, player)
+    console.log('Id', idPlayer)
     /* res.setHeader("Access-Control-Allow-Origin","*") */
-    res.send(id)
+    res.send(idPlayer)
 })
 
 app.post('/mokepon/:idPlayer', (req, res) => {
     const idPlayer = req.params.idPlayer || ''
-    const mokepon = req.body.mokepon || null
     const player = players.get(idPlayer)
+    const mokepon = req.body.mokepon || null
     if (player != undefined){
         player.mokepon = mokepon
-        player.updateIdMokepon(idPlayer)
     }
-    console.log(players)
     res.end()
 })
 
-app.post('/mokepon/:idPlayer/position', (req, res) => {
+app.post('/map/:idPlayer', (req, res) => {
     const idPlayer = req.params.idPlayer || ''
+    const player = players.get(idPlayer)
     const x = req.body.x || 0
     const y = req.body.y || 0
-    const player = players.get(idPlayer)
     if (player != undefined){
         player.updatePosition(x, y)
     }
     enemies = Array.from(players.values()).filter((player) => player.id != idPlayer && player.mokepon != null)
     res.send({enemies})
+})
+
+app.post('/send-attacks/:idPlayer', (req, res) => {
+    const idPlayer = req.params.idPlayer || ''
+    const player = players.get(idPlayer)
+    const info_p_attack = req.body.info_p_attack || null
+    if (player != undefined){
+        player.updateAttack(info_p_attack)
+    }
+    console.log('Sent', info_p_attack)
+    res.end()
+})
+
+app.get('/get-attacks/:idPlayer/:idEnemy', (req, res) => {
+    const idPlayer = req.params.idPlayer || ''
+    const idEnemy = req.params.idEnemy || ''
+    const player = players.get(idPlayer)
+    const enemy = players.get(idEnemy)
+    const info_p_attack = player.info_p_attack
+    const info_e_attack = enemy.info_e_attack
+    console.log('Receive', info_e_attack)
+    res.send({info_p_attack, info_e_attack})
+    if (info_e_attack != null){
+        enemy.info_e_attack = null
+    }
 })
 
 app.listen(8080, () => {

@@ -28,7 +28,7 @@ const history_player = document.getElementById('history_player')
 const history_enemy = document.getElementById('history_enemy')
 
 class Mokepon {
-    constructor (name, type, lives, attacks, x, y, width=40, height=50, id=null) {
+    constructor (name, type, lives, attacks, x, y, id=null, width=40, height=50) {
         this.id = id
         this.name = name
         this.type = type
@@ -44,9 +44,6 @@ class Mokepon {
         this.vel_x = 0
         this.vel_y = 0
 }
-copyMokepon(){
-    return new Mokepon(this.name, this.type, this.lives, this.attacks, this.x, this.y)
-}
 drawMokepon(){
     map.drawImage(this.logo, this.x, this.y, this.width, this.height)
 }
@@ -61,7 +58,8 @@ var player, enemy, player_i, enemy_i, player_lives, enemy_lives
 var p_attack, e_attack, player_attack, enemy_attack
 var map_width_i, map_height_i, map_width_f, map_height_f
 var interval, can_attack = true
-var idPlayer, lt_enemies = []
+var idPlayer, idEnemy, lt_enemies = []
+
 window.addEventListener('load', loadGame)
 
 function loadGame(){
@@ -89,7 +87,6 @@ function joinGame(){
             if (res.ok){
                 res.text()
                     .then(function (response){
-                        console.log(response)
                         idPlayer = response
                     })
             }
@@ -100,7 +97,8 @@ function selectPet(){
     for(pet of input_pets){
         if (pet.checked){
             player = pet.id
-            player_i = dict_mokepones.get(player).copyMokepon()
+            player_i = dict_mokepones.get(player)
+            player_i.id = idPlayer
             player_lives = player_i.lives
             sp_player_pet.innerHTML = `${player}`
             setMap()
@@ -144,10 +142,6 @@ function setMap(){
     y_percent = map_height_f / map_height_i
     player_i.x = player_i.x * x_percent
     player_i.y = player_i.y * y_percent
-    lt_mokepones.forEach((mokepon) => {
-        mokepon.x = mokepon.x * x_percent
-        mokepon.y = mokepon.y * y_percent
-    })
 }
 
 function drawMap(){
@@ -163,12 +157,14 @@ function drawMap(){
     map.clearRect(0, 0, canvas.width, canvas.height)
     player_i.drawMokepon()
     sharePosition(player_i.x, player_i.y)
-    lt_enemies.forEach((enemy) => {enemy.drawMokepon()})
-    //checkColision()
+    lt_enemies.forEach((enemy) => {
+        enemy.drawMokepon()
+        checkColision(enemy)
+    })
 }
 
 function sharePosition(x, y){
-    fetch(`http://localhost:8080/mokepon/${idPlayer}/position`, {
+    fetch(`http://localhost:8080/map/${idPlayer}`, {
         method: 'post',
         headers: {"Content-Type": "application/json"},
         body: JSON.stringify({x, y})
@@ -178,7 +174,7 @@ function sharePosition(x, y){
                 res.json()
                     .then(function({enemies}){
                             lt_enemies = enemies.map((e) => {
-                                return new Mokepon(e.mokepon.name, e.mokepon.type, e.mokepon.lives, e.mokepon.attacks, e.mokepon.x, e.mokepon.y)
+                                return new Mokepon(e.mokepon.name, e.mokepon.type, e.mokepon.lives, e.mokepon.attacks, e.mokepon.x, e.mokepon.y, e.mokepon.id)
                             })
                     })
             }
@@ -200,43 +196,38 @@ function move(event){
     }
 }
 
-function checkColision(){
+function checkColision(mokepon){
+    e_top = mokepon.y
+    e_bottom = mokepon.y + mokepon.height
+    e_left = mokepon.x
+    e_right = mokepon.x + mokepon.width
     p_top = player_i.y
     p_bottom = player_i.y + player_i.height
     p_left = player_i.x
     p_right = player_i.x + player_i.width
 
-    lt_mokepones.forEach((mokepon) => {
-        e_top = mokepon.y
-        e_bottom = mokepon.y + mokepon.height
-        e_left = mokepon.x
-        e_right = mokepon.x + mokepon.width
-
-        if (!(p_bottom < e_top || e_bottom < p_top || p_right < e_left || e_right < p_left) && can_attack) {
-            clearInterval(interval)
-            window.removeEventListener('resize', setMap)
-            window.removeEventListener('keydown', move)
-            window.addEventListener('keyup', () => {player_i.stopMokepon()})
-            for (move_btn of move_buttons){
-                move_btn.removeEventListener('mousedown', move)
-                move_btn.removeEventListener('touchstart', move)
-                move_btn.removeEventListener('mouseup', () => {player_i.stopMokepon()})
-                move_btn.removeEventListener('touchend', () => {player_i.stopMokepon()})
-            }
-            enemy_i = mokepon, enemy = enemy_i.name, enemy_lives = enemy_i.lives
-            putAttacks()
+    if (!(p_bottom < e_top || e_bottom < p_top || p_right < e_left || e_right < p_left) && can_attack) {
+        clearInterval(interval)
+        window.removeEventListener('resize', setMap)
+        window.removeEventListener('keydown', move)
+        window.addEventListener('keyup', () => {player_i.stopMokepon()})
+        for (move_btn of move_buttons){
+            move_btn.removeEventListener('mousedown', move)
+            move_btn.removeEventListener('touchstart', move)
+            move_btn.removeEventListener('mouseup', () => {player_i.stopMokepon()})
+            move_btn.removeEventListener('touchend', () => {player_i.stopMokepon()})
         }
-    })
+        enemy_i = mokepon, idEnemy = enemy_i.id
+        enemy = enemy_i.name, enemy_lives = enemy_i.lives
+        putAttacks()
+    }
 }
 
 function putAttacks(){
     can_attack = false
     player_i.attacks.forEach((attack) => {
         attack_buttons.innerHTML += `<button id=${attack.id} class='btn_attack' name=${attack.real_name}>${attack.name}</button>`
-        info_p_attacks.set(attack.name, {'real_name':attack.real_name, 'color':attack.color, 'special':attack.special})
-    })
-    enemy_i.attacks.forEach((attack) => {
-        info_e_attacks.set(attack.name, {'real_name':attack.real_name, 'color':attack.color, 'special':attack.special})
+        info_p_attacks.set(attack.name, {'name':attack.name, 'real_name':attack.real_name, 'color':attack.color, 'special':attack.special})
     })
 
     p_player_lives.innerHTML = player_lives
@@ -249,15 +240,50 @@ function putAttacks(){
     show_map.style.display = 'none'
     select_attack.style.display = 'flex'
     for(attack of attacks){
-        attack.addEventListener('click', fight)
+        attack.addEventListener('click', shareAttack)
     }
 }
 
-function fight(event){
+function shareAttack(event){
     p_attack = event.target.innerHTML
-    e_attack = enemy_i.attacks[random(0, enemy_i.attacks.length - 1)].name
-    info_p_attack = info_p_attacks.get(p_attack), info_e_attack = info_e_attacks.get(e_attack)
-    player_attack = info_p_attack['real_name'], enemy_attack = info_e_attack['real_name']
+    info_p_attack = info_p_attacks.get(p_attack)
+    fetch(`http://localhost:8080/send-attacks/${idPlayer}`, {
+        method: 'post',
+        headers: {"Content-Type": "application/json"},
+        body: JSON.stringify({info_p_attack})
+    })
+    for(attack of attacks){
+        attack.disabled = true
+    }
+    interval = setInterval(getAttacks, 50)
+}
+
+function getAttacks(){
+    fetch(`http://localhost:8080/get-attacks/${idPlayer}/${idEnemy}`)
+        .then(function (res){
+            if (res.ok){
+                res.json()
+                .then(function ({info_p_attack, info_e_attack}){
+                    if (info_e_attack != null){
+                        clearInterval(interval)
+                        fight(info_p_attack, info_e_attack)
+                        for(attack of attacks){
+                            attack.disabled = false
+                        }
+                    } else {
+                        message.innerHTML = `Waiting for attacks...`
+                    }
+                })
+            }
+        })
+
+}
+
+function fight(info_p_attack, info_e_attack){
+    player_attack = info_p_attack['real_name']
+    e_attack = info_e_attack['name']
+    enemy_attack = info_e_attack['real_name']
+
     info_card_p.style.boxShadow = `0px 0px 25px ${info_p_attack['color']}`;
     info_card_e.style.boxShadow = `0px 0px 25px ${info_e_attack['color']}`;
 
