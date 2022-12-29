@@ -28,8 +28,8 @@ const history_player = document.getElementById('history_player')
 const history_enemy = document.getElementById('history_enemy')
 
 class Mokepon {
-    constructor (name, type, lives, attacks, x, y, id=null, width=40, height=50) {
-        this.id = id
+    constructor (name, type, lives, attacks, id, x, y, width, height) {
+        this.id = id || null
         this.name = name
         this.type = type
         this.attacks = attacks
@@ -37,8 +37,8 @@ class Mokepon {
         this.image = `assets/${name}.png`
         this.logo = new Image()
         this.logo.src = `assets/${name}Logo.png`
-        this.width = width
-        this.height = height
+        this.width = width || 40
+        this.height = height || 50
         this.x = x || random(0, canvas.width - this.width)
         this.y = y || random(0, canvas.height - this.height)
         this.vel_x = 0
@@ -52,9 +52,8 @@ stopMokepon(){
 }
 }
 
-const lt_mokepones = [], dict_mokepones = new Map(), info_p_attacks = new Map()
 var player, enemy, player_i, enemy_i, player_lives, enemy_lives
-var p_attack, e_attack, player_attack, enemy_attack
+var p_attack, e_attack, player_attack, enemy_attack, info_p_attacks = new Map()
 var map_width_i, map_height_i, map_width_f, map_height_f, max_map_width = 630
 var interval, idPlayer, idEnemy, lt_enemies = []
 
@@ -64,67 +63,59 @@ function loadGame(){
     show_map.style.display = 'none'
     select_attack.style.display = 'none'
     btn_restart.style.display = 'none'
-    loadData()
 
-    lt_mokepones.forEach((mokepon) => {
-        pet_cards.innerHTML += `<input type='radio' name='pet' id=${mokepon.name}>
-                                <label class='pet_card' for=${mokepon.name}>
-                                <p>${mokepon.name} ${mokepon.type}</p>
-                                <img src=${mokepon.image} alt=${mokepon.name}>
-                                </label>`
-        dict_mokepones.set(mokepon.name, mokepon)
-    })
-
-    btn_select_pet.addEventListener('click', selectPet)
     joinGame()
+    btn_select_pet.addEventListener('click', () => {
+        for(pet of input_pets){
+            if (pet.checked){
+                player = pet.id
+                getMokepon()
+            }
+        }
+    })
 }
 
 function joinGame(){
     fetch('http://192.168.0.10:8080/join')
         .then(function (res){
             if (res.ok){
-                res.text()
-                    .then(function (response){
-                        idPlayer = response
+                res.json()
+                    .then(function ({id, cards}){
+                        idPlayer = id
+                        pet_cards.innerHTML = cards
                     })
             }
         })
 }
 
-function selectPet(){
-    for(pet of input_pets){
-        if (pet.checked){
-            player = pet.id
-            player_i = dict_mokepones.get(player)
-            player_i.id = idPlayer
-            player_lives = player_i.lives
-            sp_player_pet.innerHTML = `${player}`
-            setMap()
+function getMokepon() {
+    fetch(`http://192.168.0.10:8080/mokepon/${idPlayer}/${player}`)
+        .then(function (res){
+            if (res.ok){
+                res.json()
+                    .then(function({m}){
+                        player_i = new Mokepon(m.name, m.type, m.lives, m.attacks, m.id)
+                        player_lives = player_i.lives
+                        sp_player_pet.innerHTML = `${player}`
+                        setMap()
 
-            select_pet.style.display = 'none'
-            show_map.style.display = 'flex'
-            
-            interval = setInterval(drawMap, 50)
-            window.addEventListener('resize', setMap)
-            window.addEventListener('keydown', move)
-            window.addEventListener('keyup', function(){player_i.stopMokepon()})
-            for (move_btn of move_buttons){
-                move_btn.addEventListener('mousedown', move)
-                move_btn.addEventListener('touchstart', move)
-                move_btn.addEventListener('mouseup', () => {player_i.stopMokepon()})
-                move_btn.addEventListener('touchend', () => {player_i.stopMokepon()})
+                        select_pet.style.display = 'none'
+                        show_map.style.display = 'flex'
+                        
+                        interval = setInterval(drawMap, 50)
+                        window.addEventListener('resize', setMap)
+                        window.addEventListener('keydown', move)
+                        window.addEventListener('keyup', () => {player_i.stopMokepon()})
+                        for (move_btn of move_buttons){
+                            move_btn.addEventListener('mousedown', move)
+                            move_btn.addEventListener('touchstart', move)
+                            move_btn.addEventListener('mouseup', () => {player_i.stopMokepon()})
+                            move_btn.addEventListener('touchend', () => {player_i.stopMokepon()})
+                        }
+                        shareMokepon()
+                    })
             }
-            shareMokepon()
-        }
-    }
-}
-
-function shareMokepon() {
-    fetch(`http://192.168.0.10:8080/mokepon/${idPlayer}`, {
-        method: 'post',
-        headers: {"Content-Type": "application/json"},
-        body: JSON.stringify({mokepon: player_i})
-    })
+        })
 }
 
 function setMap(){
@@ -140,6 +131,14 @@ function setMap(){
     y_percent = map_height_f / map_height_i
     player_i.x = player_i.x * x_percent
     player_i.y = player_i.y * y_percent
+}
+
+function shareMokepon() {
+    fetch(`http://192.168.0.10:8080/mokepon/${idPlayer}`, {
+        method: 'post',
+        headers: {"Content-Type": "application/json"},
+        body: JSON.stringify({mokepon: player_i})
+    })
 }
 
 function drawMap(){
@@ -172,7 +171,7 @@ function sharePosition(x, y){
                 res.json()
                     .then(function({enemies}){
                             lt_enemies = enemies.map((e) => {
-                                return new Mokepon(e.mokepon.name, e.mokepon.type, e.mokepon.lives, e.mokepon.attacks, e.mokepon.x, e.mokepon.y, e.mokepon.id)
+                                return new Mokepon(e.mokepon.name, e.mokepon.type, e.mokepon.lives, e.mokepon.attacks, e.mokepon.id, e.mokepon.x, e.mokepon.y)
                             })
                     })
             }
@@ -362,50 +361,4 @@ function end_game(final){
 
 function random(min, max){
     return Math.floor(Math.random() * (max - min + 1) + min)
-}
-
-function loadData(){
-    let cattie_attacks = [{'name':'Ball 🧶', 'id':'btn_ball', 'real_name':'Fire 🔥', 'color':'#f8af41', 'special':true},
-                        {'name':'Fish 🐟', 'id':'btn_fish', 'real_name':'Fire 🔥', 'color':'#f8af41', 'special':true},
-                        {'name':'Fire 🔥', 'id':'btn_fire', 'real_name':'Fire 🔥', 'color':'#f8af41', 'special':false},
-                        {'name':'Water 💧', 'id':'btn_water', 'real_name':'Water 💧', 'color':'#4fd7d5', 'special':false},
-                        {'name':'Soil 🌱', 'id':'btn_soil', 'real_name':'Soil 🌱', 'color':'#88dd67', 'special':false}]
-
-    let doggito_attacks = [{'name':'Bone 🦴', 'id':'btn_bone', 'real_name':'Water 💧', 'color':'#4fd7d5', 'special':true},
-                        {'name':'Bark 🐶', 'id':'btn_bark', 'real_name':'Water 💧', 'color':'#4fd7d5', 'special':true},
-                        {'name':'Fire 🔥', 'id':'btn_fire', 'real_name':'Fire 🔥', 'color':'#f8af41', 'special':false},
-                        {'name':'Water 💧', 'id':'btn_water', 'real_name':'Water 💧', 'color':'#4fd7d5', 'special':false},
-                        {'name':'Soil 🌱', 'id':'btn_soil', 'real_name':'Soil 🌱', 'color':'#88dd67', 'special':false}]
-
-    let lapinette_attacks = [{'name':'Carrot 🥕', 'id':'btn_carrot', 'real_name':'Soil 🌱', 'color':'#88dd67', 'special':true},
-                        {'name':'Teeth 🦷', 'id':'btn_teeth', 'real_name':'Soil 🌱', 'color':'#88dd67', 'special':true},
-                        {'name':'Fire 🔥', 'id':'btn_fire', 'real_name':'Fire 🔥', 'color':'#f8af41', 'special':false},
-                        {'name':'Water 💧', 'id':'btn_water', 'real_name':'Water 💧', 'color':'#4fd7d5', 'special':false},
-                        {'name':'Soil 🌱', 'id':'btn_soil', 'real_name':'Soil 🌱', 'color':'#88dd67', 'special':false}]
-
-    let cheftle_attacks = [{'name':'Pan 🍳', 'id':'btn_pan', 'real_name':'Fire 🔥', 'color':'#f8af41', 'special':true},
-                        {'name':'Fog ☁️', 'id':'btn_fog', 'real_name':'Water 💧', 'color':'#4fd7d5', 'special':true},
-                        {'name':'Fire 🔥', 'id':'btn_fire', 'real_name':'Fire 🔥', 'color':'#f8af41', 'special':false},
-                        {'name':'Water 💧', 'id':'btn_water', 'real_name':'Water 💧', 'color':'#4fd7d5', 'special':false},
-                        {'name':'Soil 🌱', 'id':'btn_soil', 'real_name':'Soil 🌱', 'color':'#88dd67', 'special':false}]
-
-    let lolito_attacks = [{'name':'Peck 🦆', 'id':'btn_peck', 'real_name':'Soil 🌱', 'color':'#88dd67', 'special':true},
-                        {'name':'Splash 💦', 'id':'btn_splash', 'real_name':'Water 💧', 'color':'#4fd7d5', 'special':true},
-                        {'name':'Fire 🔥', 'id':'btn_fire', 'real_name':'Fire 🔥', 'color':'#f8af41', 'special':false},
-                        {'name':'Water 💧', 'id':'btn_water', 'real_name':'Water 💧', 'color':'#4fd7d5', 'special':false},
-                        {'name':'Soil 🌱', 'id':'btn_soil', 'real_name':'Soil 🌱', 'color':'#88dd67', 'special':false}]
-
-    let roundi_attacks = [{'name':'Cookie 🍪', 'id':'btn_cookie', 'real_name':'Fire 🔥', 'color':'#f8af41', 'special':true},
-                        {'name':'Claws 🐾', 'id':'btn_claws', 'real_name':'Soil 🌱', 'color':'#88dd67', 'special':true},
-                        {'name':'Fire 🔥', 'id':'btn_fire', 'real_name':'Fire 🔥', 'color':'#f8af41', 'special':false},
-                        {'name':'Water 💧', 'id':'btn_water', 'real_name':'Water 💧', 'color':'#4fd7d5', 'special':false},
-                        {'name':'Soil 🌱', 'id':'btn_soil', 'real_name':'Soil 🌱', 'color':'#88dd67', 'special':false}]
-
-    let cattie = new Mokepon('Cattie', '🔥', 7, cattie_attacks)
-    let doggito = new Mokepon('Doggito', '💧', 7, doggito_attacks)
-    let lapinette = new Mokepon('Lapinette', '🌱', 7, lapinette_attacks)
-    let cheftle = new Mokepon('Cheftle', '🔥💧', 6, cheftle_attacks)
-    let lolito = new Mokepon('Lolito', '🌱💧', 6, lolito_attacks)
-    let roundi = new Mokepon('Roundi', '🔥🌱', 6, roundi_attacks)
-    lt_mokepones.push(cattie, doggito, lapinette, cheftle, lolito, roundi)
 }
