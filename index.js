@@ -65,8 +65,8 @@ app.post('/mokepon/:idPlayer', (req, res) => {
 app.post('/map/:idPlayer', (req, res) => {
     const idPlayer = req.params.idPlayer || ''
     const player = players.get(idPlayer)
-    const x = req.body.x || 0
-    const y = req.body.y || 0
+    const x = req.body.x || 1
+    const y = req.body.y || 1
     if (player != undefined){
         player.updatePosition(x, y)
     }
