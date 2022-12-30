@@ -1,6 +1,5 @@
-# Mokepon
+# Mokepón!
 Juego inspirado en curso de Platzi
-
 Créditos: Sara Sofía Cárdenas Rodríguez
 
 ![home](https://user-images.githubusercontent.com/101780188/210098448-38934152-f6a2-4842-95e6-69dc61138b7b.jpg)
