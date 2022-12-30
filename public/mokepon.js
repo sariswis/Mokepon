@@ -39,8 +39,8 @@ class Mokepon {
         this.logo.src = `assets/${name}Logo.png`
         this.width = width || 40
         this.height = height || 50
-        this.x = x || random(0, canvas.width - this.width)
-        this.y = y || random(0, canvas.height - this.height)
+        this.x = x || random(1, canvas.width - this.width)
+        this.y = y || random(1, canvas.height - this.height)
         this.vel_x = 0
         this.vel_y = 0
     }
@@ -127,10 +127,10 @@ function setMap(){
     canvas.width = map_width_f
     canvas.height = map_height_f
 
-    x_percent = map_width_f / map_width_i
-    y_percent = map_height_f / map_height_i
-    player_i.x = player_i.x * x_percent
-    player_i.y = player_i.y * y_percent
+    x_percent = Math.floor(map_width_f / map_width_i)
+    y_percent = Math.floor(map_height_f / map_height_i)
+    player_i.x = Math.floor(player_i.x * x_percent)
+    player_i.y = Math.floor(player_i.y * y_percent)
 }
 
 function shareMokepon() {
