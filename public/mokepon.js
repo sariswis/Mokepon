@@ -43,17 +43,17 @@ class Mokepon {
         this.y = y || random(0, canvas.height - this.height)
         this.vel_x = 0
         this.vel_y = 0
-}
-drawMokepon(){
-    map.drawImage(this.logo, this.x, this.y, this.width, this.height)
-}
-stopMokepon(){
-    this.vel_x = 0, this.vel_y = 0
-}
+    }
+    drawMokepon(){
+        map.drawImage(this.logo, this.x, this.y, this.width, this.height)
+    }
+    stopMokepon(){
+        this.vel_x = 0, this.vel_y = 0
+    }
 }
 
 var player, enemy, player_i, enemy_i, player_lives, enemy_lives
-var p_attack, e_attack, player_attack, enemy_attack, info_p_attacks = new Map()
+var p_attack, e_attack, info_p_attacks = new Map()
 var map_width_i, map_height_i, map_width_f, map_height_f, max_map_width = 630
 var interval, idPlayer, idEnemy, lt_enemies = []
 
@@ -144,10 +144,9 @@ function shareMokepon() {
 function drawMap(){
     player_i.x += player_i.vel_x
     player_i.y += player_i.vel_y
-    
-    if (player_i.x < 0){player_i.x = 0} 
+    if (player_i.x < 0){player_i.x = 1} 
     else if (player_i.x > canvas.width - player_i.width){player_i.x = canvas.width - player_i.width}
-    if (player_i.y < 0){player_i.y = 0} 
+    if (player_i.y < 0){player_i.y = 1} 
     else if (player_i.y > canvas.height - player_i.height){player_i.y = canvas.height - player_i.height}
     
     
@@ -271,10 +270,10 @@ function getAttacks(){
         .then(function (res){
             if (res.ok){
                 res.json()
-                .then(function ({info_p_attack, info_e_attack}){
-                    if (info_e_attack != null){
+                .then(function ({info_p_attack, info_e_attack, result, player_lives, enemy_lives}){
+                    if (result != null){
                         clearInterval(interval)
-                        fight(info_p_attack, info_e_attack)
+                        fight(info_p_attack, info_e_attack, result, player_lives, enemy_lives)
                         for(attack of attacks){
                             attack.disabled = false
                         }
@@ -285,46 +284,14 @@ function getAttacks(){
 
 }
 
-function fight(info_p_attack, info_e_attack){
-    player_attack = info_p_attack['real_name']
+function fight(info_p_attack, info_e_attack, result, player_lives, enemy_lives){
     e_attack = info_e_attack['name']
-    enemy_attack = info_e_attack['real_name']
-
-    info_card_p.style.boxShadow = `0px 0px 25px ${info_p_attack['color']}`;
-    info_card_e.style.boxShadow = `0px 0px 25px ${info_e_attack['color']}`;
-
-    if ((player_attack == enemy_attack)){
-        result = `It's a tie!`
-    } else if ((player_attack == 'Fire 🔥' && enemy_attack == 'Soil 🌱') || 
-    (player_attack == 'Water 💧' && enemy_attack == 'Fire 🔥') || 
-    (player_attack == 'Soil 🌱' && enemy_attack == 'Water 💧')){
-        result = `You win!`
-        enemy_lives--
-        p_enemy_lives.innerHTML = enemy_lives
-    } else {
-        result = `You've lost!`
-        player_lives--
-        p_player_lives.innerHTML = player_lives
-    }
-
+    info_card_p.style.boxShadow = `0px 0px 25px ${info_p_attack['color']}`
+    info_card_e.style.boxShadow = `0px 0px 25px ${info_e_attack['color']}`
+    p_enemy_lives.innerHTML = enemy_lives
+    p_player_lives.innerHTML = player_lives
     createMessage(result)
     checkLives()
-
-    if (info_p_attack['special'] || info_e_attack['special']){
-        specialAttack(result)
-    } 
-}
-
-function specialAttack(result){
-    if (result == `You win!` && enemy_lives > 0){
-        enemy_lives--
-        p_enemy_lives.innerHTML = enemy_lives
-        checkLives()
-    } else if (result == `You've lost!` && player_lives > 0){
-        player_lives--
-        p_player_lives.innerHTML = player_lives
-        checkLives()
-    }
 }
 
 function createMessage(result){
@@ -342,14 +309,14 @@ function createMessage(result){
 }
 
 function checkLives(){
-    if (enemy_lives == 0){
-        end_game(`Good game! YOU WIN! 🎉🎉`)
-    } else if (player_lives == 0){
-        end_game(`Oh! GAME OVER! 🎮👾`)
+    if (p_enemy_lives.innerHTML == 0){
+        endGame(`Good game! YOU WIN! 🎉🎉`)
+    } else if (p_player_lives.innerHTML == 0){
+        endGame(`Oh! GAME OVER! 🎮👾`)
     }
 }
 
-function end_game(final){
+function endGame(final){
     message.innerHTML = final
     for(attack of attacks){
         attack.disabled = true
